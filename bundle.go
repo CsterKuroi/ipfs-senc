@@ -14,7 +14,7 @@ import (
 func Bundle(localPath string, wrapDir bool) (bundle io.Reader, err error) {
   r, w := io.Pipe()
   go func() {
-    err := TarAndZip(localPath, wrapDir, w)
+    err := Tar(localPath, wrapDir, w)
     w.CloseWithError(err)
   }()
   return r, nil
@@ -22,15 +22,15 @@ func Bundle(localPath string, wrapDir bool) (bundle io.Reader, err error) {
 
 // Unbundle all contents of a bundle into a localPath
 func Unbundle(bundle io.Reader, localPath string) error {
-  return UnzipAndUntar(localPath, bundle)
+  return Untar(localPath, bundle)
 }
 
 // from: https://medium.com/@skdomino/taring-untaring-files-in-go-6b07cf56bc07
 //
-// TarAndZip takes a source and variable writers and walks 'source' writing each file
+// Tar takes a source and variable writers and walks 'source' writing each file
 // found to the tar writer; the purpose for accepting multiple writers is to allow
 // for multiple outputs (for example a file, or md5 hash)
-func TarAndZip(src string, wrapDir bool, writers ...io.Writer) error {
+func Tar(src string, wrapDir bool, writers ...io.Writer) error {
 
   // ensure the src actually exists before trying to tar it
   if _, err := os.Stat(src); err != nil {
@@ -111,9 +111,9 @@ func TarAndZip(src string, wrapDir bool, writers ...io.Writer) error {
   })
 }
 
-// UnzipAndUntar takes a destination path and a reader; a tar reader loops over the tarfile
+// Untar takes a destination path and a reader; a tar reader loops over the tarfile
 // creating the file structure at 'dst' along the way, and writing any files
-func UnzipAndUntar(dst string, r io.Reader) error {
+func Untar(dst string, r io.Reader) error {
 
   // gzr, err := gzip.NewReader(r)
   // defer gzr.Close()
